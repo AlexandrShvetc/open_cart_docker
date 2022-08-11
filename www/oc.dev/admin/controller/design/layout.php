@@ -1,4 +1,7 @@
 <?php
+// *	@source		See SOURCE.txt for source and other copyright.
+// *	@license	GNU General Public License version 3; see LICENSE.txt
+
 class ControllerDesignLayout extends Controller {
 	private $error = array();
 
@@ -46,6 +49,9 @@ class ControllerDesignLayout extends Controller {
 
 	public function edit() {
 		$this->load->language('design/layout');
+
+        $this->document->addScript('view/javascript/jquery/Sortable.js');
+        $this->document->addScript('view/javascript/jquery/jquery-sortable.js');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
@@ -415,6 +421,7 @@ class ControllerDesignLayout extends Controller {
 		$this->load->model('catalog/product');
 		$this->load->model('catalog/category');
 		$this->load->model('catalog/information');
+		$this->load->model('catalog/manufacturer');
 
 		foreach ($this->request->post['selected'] as $layout_id) {
 			if ($this->config->get('config_layout_id') == $layout_id) {
@@ -437,6 +444,12 @@ class ControllerDesignLayout extends Controller {
 
 			if ($category_total) {
 				$this->error['warning'] = sprintf($this->language->get('error_category'), $category_total);
+			}
+			
+			$manufacturer_total = $this->model_catalog_manufacturer->getTotalManufacturerByLayoutId($layout_id);
+			
+			if ($manufacturer_total) {
+				$this->error['warning'] = sprintf($this->language->get('error_manufacturer'), $manufacturer_total);
 			}
 
 			$information_total = $this->model_catalog_information->getTotalInformationsByLayoutId($layout_id);

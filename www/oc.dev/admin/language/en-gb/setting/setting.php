@@ -1,4 +1,7 @@
 <?php
+// *	@source		See SOURCE.txt for source and other copyright.
+// *	@license	GNU General Public License version 3; see LICENSE.txt
+
 // Heading
 $_['heading_title']                  = 'Settings';
 
@@ -32,6 +35,8 @@ $_['text_general']                   = 'General';
 $_['text_security']                  = 'Security';
 $_['text_upload']                    = 'Uploads';
 $_['text_error']                     = 'Error Handling';
+$_['text_canonical_ocstore']         = 'ocStore solution';
+$_['text_canonical_opencart']        = 'original OpenCart';
 
 // Entry
 $_['entry_meta_title']               = 'Meta Title';
@@ -57,9 +62,11 @@ $_['entry_language']                 = 'Language';
 $_['entry_admin_language']           = 'Administration Language';
 $_['entry_currency']                 = 'Currency';
 $_['entry_currency_auto']            = 'Auto Update Currency';
+$_['entry_currency_engine']          = 'Currency Rate Engine';
 $_['entry_length_class']             = 'Length Class';
 $_['entry_weight_class']             = 'Weight Class';
 $_['entry_limit_admin']              = 'Default Items Per Page (Admin)';
+$_['entry_limit_autocomplete']     = 'Default Items for search with autocomplete Page (Admin)';
 $_['entry_product_count']            = 'Category Product Count';
 $_['entry_review']                   = 'Allow Reviews';
 $_['entry_review_guest']             = 'Allow Guest Reviews';
@@ -123,6 +130,20 @@ $_['entry_error_display']            = 'Display Errors';
 $_['entry_error_log']                = 'Log Errors';
 $_['entry_error_filename']           = 'Error Log Filename';
 $_['entry_status']                   = 'Status';
+$_['entry_seo_pro']                   	= 'Enable SeoPro';
+$_['entry_page_postfix']               	= 'Page postfix (like .html)';
+$_['entry_config_seo_url_include_path']	= 'Product url with categories';
+$_['entry_config_seo_url_cache']        = 'Enable seo pro cache';
+$_['entry_seopro_addslash']			   = 'Add slash for end of url';
+$_['entry_seopro_lowercase']		   = 'URLs lowercase';
+$_['entry_canonical_method']	     = 'Method of generation canonical, prev, next. <a target="_blank" href="https://opencartforum.com/topic/174539-sposob-vyvoda-tegov-canonical-prev-next-v-ocstore/">More</a>';
+$_['entry_add_prevnext']	         = 'Using prev, next for pagination';
+$_['entry_add_prevnext_help']	     = 'Work only with ocStore solution method';
+$_['entry_canonical_self']	         = 'Display tag canonical on base page';
+$_['entry_canonical_self_help']	     = 'Work only with ocStore solution method';
+$_['entry_canonical_method_help']	 = 'Choosing method for generate prev, next for pagination';
+$_['entry_noindex_status']	         = 'Using noindex for category, product, manufacturers, blog etc.';
+$_['entry_noindex_disallow_params']	 = 'Not use noindex for page with get params:';
 
 // Help
 $_['help_geocode']                   = 'Please enter your store location geocode manually.';
@@ -132,6 +153,7 @@ $_['help_location']                  = 'The different store locations you have t
 $_['help_currency']                  = 'Change the default currency. Clear your browser cache to see the change and reset your existing cookie.';
 $_['help_currency_auto']             = 'Set your store to automatically update currencies daily.';
 $_['help_limit_admin']               = 'Determines how many admin items are shown per page (orders, customers, etc).';
+$_['help_limit_autocomplete']      = 'Determines how many items are shown for search with autocomplete (attributes, options, filters, products, etc).';
 $_['help_product_count']             = 'Show the number of products inside the subcategories in the storefront header category menu. Be warned, this will cause an extreme performance hit for stores with a lot of subcategories!';
 $_['help_review']                    = 'Enable/Disable new review entry and display of existing reviews.';
 $_['help_review_guest']              = 'Allow guests to post reviews.';
@@ -183,6 +205,7 @@ $_['help_maintenance']               = 'Prevents customers from browsing your st
 $_['help_password']                  = 'Allow forgotten password to be used for the admin. This will be disabled automatically if the system detects a hack attempt.';
 $_['help_encryption']                = 'Please provide a secret key that will be used to encrypt private information when processing orders.';
 $_['help_compression']               = 'GZIP for more efficient transfer to requesting clients. Compression level must be between 0 - 9.';
+$_['help_seo_pro']     				 = "Let's make seo great again!";
 
 // Error
 $_['error_warning']                  = 'Warning: Please check the form carefully for errors!';

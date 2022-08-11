@@ -1,4 +1,7 @@
 <?php
+// *	@source		See SOURCE.txt for source and other copyright.
+// *	@license	GNU General Public License version 3; see LICENSE.txt
+
 class ControllerProductCategory extends Controller {
 	public function index() {
 		$this->load->language('product/category');
@@ -9,32 +12,57 @@ class ControllerProductCategory extends Controller {
 
 		$this->load->model('tool/image');
 
+
+		$data['text_empty'] = $this->language->get('text_empty');
+
+        if ($this->config->get('config_noindex_disallow_params')) {
+            $params = explode ("\r\n", $this->config->get('config_noindex_disallow_params'));
+            if(!empty($params)) {
+                $disallow_params = $params;
+            }
+        }
+
 		if (isset($this->request->get['filter'])) {
 			$filter = $this->request->get['filter'];
+			if (!in_array('filter', $disallow_params, true) && $this->config->get('config_noindex_status')){
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$filter = '';
 		}
 
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
+            if (!in_array('sort', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$sort = 'p.sort_order';
 		}
 
 		if (isset($this->request->get['order'])) {
 			$order = $this->request->get['order'];
+            if (!in_array('order', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$order = 'ASC';
 		}
 
 		if (isset($this->request->get['page'])) {
 			$page = (int)$this->request->get['page'];
+            if (!in_array('page', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$page = 1;
 		}
 
 		if (isset($this->request->get['limit'])) {
 			$limit = (int)$this->request->get['limit'];
+            if (!in_array('limit', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
@@ -90,11 +118,25 @@ class ControllerProductCategory extends Controller {
 		$category_info = $this->model_catalog_category->getCategory($category_id);
 
 		if ($category_info) {
-			$this->document->setTitle($category_info['meta_title']);
+
+			if ($category_info['meta_title']) {
+				$this->document->setTitle($category_info['meta_title']);
+			} else {
+				$this->document->setTitle($category_info['name']);
+			}
+
+			if ($category_info['noindex'] <= 0 && $this->config->get('config_noindex_status')) {
+				$this->document->setRobots('noindex,follow');
+			}
+
+			if ($category_info['meta_h1']) {
+				$data['heading_title'] = $category_info['meta_h1'];
+			} else {
+				$data['heading_title'] = $category_info['name'];
+			}
+
 			$this->document->setDescription($category_info['meta_description']);
 			$this->document->setKeywords($category_info['meta_keyword']);
-
-			$data['heading_title'] = $category_info['name'];
 
 			$data['text_compare'] = sprintf($this->language->get('text_compare'), (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0));
 
@@ -182,7 +224,7 @@ class ControllerProductCategory extends Controller {
 					$special = false;
 					$tax_price = (float)$result['price'];
 				}
-	
+
 				if ($this->config->get('config_tax')) {
 					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
 				} else {
@@ -333,20 +375,47 @@ class ControllerProductCategory extends Controller {
 
 			$data['results'] = sprintf($this->language->get('text_pagination'), ($product_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($product_total - $limit)) ? $product_total : ((($page - 1) * $limit) + $limit), $product_total, ceil($product_total / $limit));
 
-			// http://googlewebmastercentral.blogspot.com/2011/09/pagination-with-relnext-and-relprev.html
-			if ($page == 1) {
-			    $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id']), 'canonical');
-			} else {
-				$this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&page='. $page), 'canonical');
-			}
-			
-			if ($page > 1) {
-			    $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . (($page - 2) ? '&page='. ($page - 1) : '')), 'prev');
-			}
+            if (!$this->config->get('config_canonical_method')) {
+                // http://googlewebmastercentral.blogspot.com/2011/09/pagination-with-relnext-and-relprev.html
+                if ($page == 1) {
+                    $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id']), 'canonical');
+                } elseif ($page == 2) {
+                    $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id']), 'prev');
+                } else {
+                    $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&page=' . ($page - 1)), 'prev');
+                }
 
-			if ($limit && ceil($product_total / $limit) > $page) {
-			    $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&page='. ($page + 1)), 'next');
-			}
+                if ($limit && ceil($product_total / $limit) > $page) {
+                    $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&page=' . ($page + 1)), 'next');
+                }
+            } else {
+
+                if (isset($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) {
+                    $server = $this->config->get('config_ssl');
+                } else {
+                    $server = $this->config->get('config_url');
+                };
+
+                $request_url = rtrim($server, '/') . $this->request->server['REQUEST_URI'];
+                $canonical_url = $this->url->link('product/category', 'path=' . $category_info['category_id']);
+
+                if (($request_url != $canonical_url) || $this->config->get('config_canonical_self')) {
+                    $this->document->addLink($canonical_url, 'canonical');
+                }
+
+                if ($this->config->get('config_add_prevnext')) {
+
+                    if ($page == 2) {
+                        $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id']), 'prev');
+                    } elseif ($page > 2)  {
+                        $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&page=' . ($page - 1)), 'prev');
+                    }
+
+                    if ($limit && ceil($product_total / $limit) > $page) {
+                        $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&page=' . ($page + 1)), 'next');
+                    }
+                }
+            }
 
 			$data['sort'] = $sort;
 			$data['order'] = $order;

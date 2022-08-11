@@ -5,6 +5,8 @@ class ControllerProductManufacturer extends Controller {
 
 		$this->load->model('catalog/manufacturer');
 
+		$this->load->model('tool/image');
+
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$data['breadcrumbs'] = array();
@@ -67,26 +69,45 @@ class ControllerProductManufacturer extends Controller {
 			$manufacturer_id = 0;
 		}
 
-		if (isset($this->request->get['sort'])) {
+        if ($this->config->get('config_noindex_disallow_params')) {
+            $params = explode ("\r\n", $this->config->get('config_noindex_disallow_params'));
+            if(!empty($params)) {
+                $disallow_params = $params;
+            }
+        }
+
+        if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
+            if (!in_array('sort', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$sort = 'p.sort_order';
 		}
 
 		if (isset($this->request->get['order'])) {
 			$order = $this->request->get['order'];
+            if (!in_array('order', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$order = 'ASC';
 		}
 
 		if (isset($this->request->get['page'])) {
 			$page = (int)$this->request->get['page'];
+            if (!in_array('page', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$page = 1;
 		}
 
 		if (isset($this->request->get['limit'])) {
 			$limit = (int)$this->request->get['limit'];
+            if (!in_array('limit', $disallow_params, true) && $this->config->get('config_noindex_status')) {
+                $this->document->setRobots('noindex,follow');
+            }
 		} else {
 			$limit = (int)$this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
@@ -106,7 +127,33 @@ class ControllerProductManufacturer extends Controller {
 		$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
 
 		if ($manufacturer_info) {
-			$this->document->setTitle($manufacturer_info['name']);
+
+			if ($manufacturer_info['meta_title']) {
+				$this->document->setTitle($manufacturer_info['meta_title']);
+			} else {
+				$this->document->setTitle($manufacturer_info['name']);
+			}
+
+			if ($manufacturer_info['noindex'] <= 0 && $this->config->get('config_noindex_status')) {
+				$this->document->setRobots('noindex,follow');
+			}
+
+			if ($manufacturer_info['meta_h1']) {
+				$data['heading_title'] = $manufacturer_info['meta_h1'];
+			} else {
+				$data['heading_title'] = $manufacturer_info['name'];
+			}
+
+			$this->document->setDescription($manufacturer_info['meta_description']);
+			$this->document->setKeywords($manufacturer_info['meta_keyword']);
+			$data['description'] = html_entity_decode($manufacturer_info['description'], ENT_QUOTES, 'UTF-8');
+
+
+			if ($manufacturer_info['image']) {
+				$data['thumb'] = $this->model_tool_image->resize($manufacturer_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_manufacturer_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_manufacturer_height'));
+			} else {
+				$data['thumb'] = '';
+			}
 
 			$url = '';
 
@@ -130,8 +177,6 @@ class ControllerProductManufacturer extends Controller {
 				'text' => $manufacturer_info['name'],
 				'href' => $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . $url)
 			);
-
-			$data['heading_title'] = $manufacturer_info['name'];
 
 			$data['text_compare'] = sprintf($this->language->get('text_compare'), (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0));
 
@@ -171,7 +216,7 @@ class ControllerProductManufacturer extends Controller {
 					$special = false;
 					$tax_price = (float)$result['price'];
 				}
-	
+
 				if ($this->config->get('config_tax')) {
 					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
 				} else {
@@ -310,20 +355,46 @@ class ControllerProductManufacturer extends Controller {
 
 			$data['results'] = sprintf($this->language->get('text_pagination'), ($product_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($product_total - $limit)) ? $product_total : ((($page - 1) * $limit) + $limit), $product_total, ceil($product_total / $limit));
 
-			// http://googlewebmastercentral.blogspot.com/2011/09/pagination-with-relnext-and-relprev.html
-			if ($page == 1) {
-				$this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id']), 'canonical');
-			} else {
-				$this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . '&page=' . $page), 'canonical');
-			}
-			
-			if ($page > 1) {
-				$this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . (($page - 2) ? '&page=' . ($page - 1) : '')), 'prev');
-			}
+            if (!$this->config->get('config_canonical_method')) {
+                // http://googlewebmastercentral.blogspot.com/2011/09/pagination-with-relnext-and-relprev.html
+                if ($page == 1) {
+                    $this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id']), 'canonical');
+                } elseif ($page == 2) {
+                    $this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id']), 'prev');
+                } else {
+                    $this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . '&page=' . ($page - 1)), 'prev');
+                }
 
-			if ($limit && ceil($product_total / $limit) > $page) {
-				$this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . '&page=' . ($page + 1)), 'next');
-			}
+                if ($limit && ceil($product_total / $limit) > $page) {
+                    $this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . '&page=' . ($page + 1)), 'next');
+                }
+            } else {
+                if (isset($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) {
+                    $server = $this->config->get('config_ssl');
+                } else {
+                    $server = $this->config->get('config_url');
+                };
+
+                $request_url = rtrim($server, '/') . $this->request->server['REQUEST_URI'];
+                $canonical_url = $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id']);
+
+                if (($request_url != $canonical_url) || $this->config->get('config_canonical_self')) {
+                    $this->document->addLink($canonical_url, 'canonical');
+                }
+
+                if ($this->config->get('config_add_prevnext')) {
+
+                    if ($page == 2) {
+                        $this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id']), 'prev');
+                    } elseif ($page > 2)  {
+                        $this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . '&page=' . ($page - 1)), 'prev');
+                    }
+
+                    if ($limit && ceil($product_total / $limit) > $page) {
+                        $this->document->addLink($this->url->link('product/manufacturer/info', 'manufacturer_id=' . $this->request->get['manufacturer_id'] . '&page=' . ($page + 1)), 'next');
+                    }
+                }
+            }
 
 			$data['sort'] = $sort;
 			$data['order'] = $order;

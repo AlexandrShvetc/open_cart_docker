@@ -1,4 +1,7 @@
 <?php
+// *	@source		See SOURCE.txt for source and other copyright.
+// *	@license	GNU General Public License version 3; see LICENSE.txt
+
 // Heading
 $_['heading_title']    = 'Карта мира';
 
@@ -15,5 +18,4 @@ $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_width']      = 'Ширина';
 
 // Error
-$_['error_permission'] = 'У Вас нет прав для управления данным расширением!';
-
+$_['error_permission'] = 'У вас недостаточно прав для внесения изменений!';

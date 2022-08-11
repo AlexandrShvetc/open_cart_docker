@@ -1,4 +1,7 @@
 <?php
+// *	@source		See SOURCE.txt for source and other copyright.
+// *	@license	GNU General Public License version 3; see LICENSE.txt
+
 // Heading
 $_['heading_title']       = 'Layouts';
 
@@ -7,6 +10,7 @@ $_['text_success']        = 'Success: You have modified layouts!';
 $_['text_list']           = 'Layout List';
 $_['text_add']            = 'Add Layout';
 $_['text_edit']           = 'Edit Layout';
+$_['text_move']           = 'You can move and reorder modules position';
 $_['text_remove']         = 'Remove';
 $_['text_route']          = 'Choose the store and routes to be used with this layout';
 $_['text_module']         = 'Choose the position of the modules';
@@ -33,4 +37,5 @@ $_['error_default']       = 'Warning: This layout cannot be deleted as it is cur
 $_['error_store']         = 'Warning: This layout cannot be deleted as it is currently assigned to %s stores!';
 $_['error_product']       = 'Warning: This layout cannot be deleted as it is currently assigned to %s products!';
 $_['error_category']      = 'Warning: This layout cannot be deleted as it is currently assigned to %s categories!';
+$_['error_manufacturer']  = 'Warning: This layout cannot be deleted as it is currently assigned to %s manufacturers!';
 $_['error_information']   = 'Warning: This layout cannot be deleted as it is currently assigned to %s information pages!';

@@ -6,15 +6,19 @@ services:
             - "80:80"
         volumes:
             - ./hosts:/etc/nginx/conf.d
-            - ./www:/var/www
+            - ./www/:/var/www
             - ./logs:/var/log/nginx
+        networks:
+            - app-network
     php:
         build: ./images/php
         container_name: php-fpm
         volumes:
-            - ./www:/var/www  
+            - ./www:/var/www
         environment:
-            PHP_IDE_CONFIG: ${PHP_IDE_CONFIG}      
+            PHP_IDE_CONFIG: ${PHP_IDE_CONFIG}
+        networks:
+            - app-network
     db:
         image: mysql:5.7
         container_name: db
@@ -27,9 +31,16 @@ services:
             MYSQL_PASSWORD: ${MYSQL_PASSWORD}
             MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
         volumes:
-            - ./db:/var/lib/mysql 
+            - ./db:/var/lib/mysql
+        networks:
+            - app-network
     adminer:
-        image: adminer
+        image: adminer:latest
         restart: unless-stopped
         ports:
-            - 8080:8080        
+            - 8080:8080
+        networks:
+            - app-network
+networks:
+        app-network:
+            driver: bridge

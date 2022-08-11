@@ -1,4 +1,7 @@
 <?php
+// *	@source		See SOURCE.txt for source and other copyright.
+// *	@license	GNU General Public License version 3; see LICENSE.txt
+
 class ControllerAccountReset extends Controller {
 	private $error = array();
 
@@ -21,9 +24,13 @@ class ControllerAccountReset extends Controller {
 			$this->load->language('account/reset');
 
 			$this->document->setTitle($this->language->get('heading_title'));
+			$this->document->setRobots('noindex,follow');
 
 			if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 				$this->model_account_customer->editPassword($customer_info['email'], $this->request->post['password']);
+
+				// Clear any previous login attempts
+				$this->model_account_customer->deleteLoginAttempts($customer_info['email']);
 
 				$this->session->data['success'] = $this->language->get('text_success');
 
